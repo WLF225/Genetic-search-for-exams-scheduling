@@ -1,0 +1,138 @@
+package com.example.aiproject.Classes;
+
+import com.example.aiproject.Launcher;
+
+import java.util.ArrayList;
+import java.util.List;
+
+// To encapsulate the full GA engine and make all parameters configurable from the UI
+public class GeneticAlgorithm {
+
+    // To hold all tunable parameters in one place for easy experimentation
+    private final int populationSize;
+    private final int maxGenerations;
+    private final double mutationRate;
+    private final double power;
+    private final int mustBePenalty;
+    private final int preferablePenalty;
+
+    // To track the evolving population and the best chromosome seen so far
+    private Chromosome[] population;
+    private Chromosome bestEver;
+    private double bestEverFitness = -1;
+
+    // To record the best fitness at each generation so the convergence chart can be drawn
+    private final List<Double> convergenceHistory = new ArrayList<>();
+
+    // To let the UI receive live progress updates without blocking the GA thread
+    public interface ProgressCallback {
+        // To signal each completed generation; return false to stop early
+        boolean onGeneration(int generation, int maxGenerations, double bestFitness, Chromosome best);
+    }
+
+    public GeneticAlgorithm(int populationSize, int maxGenerations, double mutationRate,
+                            double power, int mustBePenalty, int preferablePenalty){
+
+        this.populationSize = populationSize;
+        this.maxGenerations = maxGenerations;
+        this.mutationRate = mutationRate;
+        this.power = power;
+        this.mustBePenalty = mustBePenalty;
+        this.preferablePenalty = preferablePenalty;
+    }
+
+    // To run without the UI
+    public Chromosome run(){
+        return run(null);
+    }
+
+    public Chromosome run(ProgressCallback callback){
+        int courseCount = Launcher.data.getCourses().length;
+        // To start fresh so the crossover viewer shows only this run's events
+        convergenceHistory.clear();
+        Crossover.clearHistory();
+
+
+        // To seed the initial population with random chromosomes
+        population = new Chromosome[populationSize];
+        for (int i = 0; i < populationSize; i++) {
+            population[i] = new Chromosome(courseCount, power, mustBePenalty, preferablePenalty);
+        }
+
+        for (int gen = 0; gen < maxGenerations; gen++) {
+
+            // To score every chromosome fitness in the current generation
+            double[] fitnesses = evaluate(population);
+
+            // To update the all-time best whenever a fitter chromosome is found
+            for (int i = 0; i < populationSize; i++) {
+                if (fitnesses[i] > bestEverFitness) {
+                    bestEverFitness = fitnesses[i];
+                    bestEver = new Chromosome(population[i]);
+                }
+            }
+            convergenceHistory.add(bestEverFitness);
+
+            // To give the UI a chance to refresh the progress bar and labels
+            if (callback != null) {
+                boolean cont = callback.onGeneration(gen, maxGenerations, bestEverFitness, bestEver);
+                if (!cont) break;
+            }
+
+            // To build the next generation using selection crossover and mutation
+            Chromosome[] nextGen = new Chromosome[populationSize];
+
+            // To preserve the best chromosome unchanged
+            nextGen[0] = new Chromosome(bestEver);
+
+            for (int i = 1; i < populationSize; i += 2) {
+                Chromosome p1 = tournamentSelect(population, fitnesses);
+                Chromosome p2 = tournamentSelect(population, fitnesses);
+
+                Chromosome c1 = new Chromosome(p1);
+                Chromosome c2 = new Chromosome(p2);
+
+                // To apply the crossover
+                Crossover.crossover(c1, c2, gen);
+
+
+                c1.mutate(mutationRate);
+                c2.mutate(mutationRate);
+
+                nextGen[i] = c1;
+                if (i + 1 < populationSize) nextGen[i + 1] = c2;
+            }
+
+            population = nextGen;
+        }
+
+        return bestEver;
+    }
+
+    // To compute fitness scores for every chromosome in one pass
+    private double[] evaluate(Chromosome[] pop){
+        double[] f = new double[pop.length];
+        for (int i = 0; i < pop.length; i++) f[i] = pop[i].fitness().getFitness();
+        return f;
+    }
+
+    // To pick the fittest individual from a random sample
+    private Chromosome tournamentSelect(Chromosome[] pop, double[] fitnesses){
+        int best = (int) (Math.random() * pop.length);
+        for (int i = 1; i < pop.length; i++) {
+            int candidate = (int) (Math.random() * pop.length);
+            if (fitnesses[candidate] > fitnesses[best])
+                best = candidate;
+        }
+        return pop[best];
+    }
+
+    public List<Double> getConvergenceHistory(){
+        return convergenceHistory;
+    }
+
+    public double getBestEverFitness(){
+        return bestEverFitness;
+    }
+
+}

@@ -1,0 +1,129 @@
+/* ── Base ───────────────────────────────────────────────────── */
+.root {
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #1a1a2e;
+}
+
+/* ── Tab pane ───────────────────────────────────────────────── */
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: #16213e;
+}
+.tab-pane .tab {
+    -fx-background-color: #16213e;
+    -fx-padding: 6 16;
+}
+.tab-pane .tab:selected {
+    -fx-background-color: #0f3460;
+}
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #aaa;
+    -fx-font-size: 13px;
+}
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #e94560;
+    -fx-font-weight: bold;
+}
+
+/* ── Titled pane ────────────────────────────────────────────── */
+.titled-pane > .title {
+    -fx-background-color: #0f3460;
+}
+.titled-pane > .title > .text {
+    -fx-fill: white;
+}
+.titled-pane > .content {
+    -fx-background-color: #16213e;
+    -fx-border-color: #0f3460;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.button {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: white;
+    -fx-background-radius: 4;
+    -fx-cursor: hand;
+}
+.button:hover {
+    -fx-background-color: #e94560;
+}
+.button:disabled {
+    -fx-opacity: 0.4;
+}
+
+/* ── Spinner / ComboBox ─────────────────────────────────────── */
+.spinner, .combo-box {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: white;
+}
+.spinner .text-field, .combo-box .text-field {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: white;
+}
+
+/* ── Progress bar ───────────────────────────────────────────── */
+.progress-bar .bar {
+    -fx-background-color: #e94560;
+}
+.progress-bar .track {
+    -fx-background-color: #0f3460;
+}
+
+/* ── Table ───────────────────────────────────────────────────── */
+.table-view {
+    -fx-background-color: #16213e;
+    -fx-table-cell-border-color: #0f3460;
+}
+.table-view .column-header {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: white;
+}
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+.table-row-cell {
+    -fx-background-color: #16213e;
+    -fx-text-fill: #ddd;
+}
+.table-row-cell:odd {
+    -fx-background-color: #1a1a2e;
+}
+.table-row-cell:selected {
+    -fx-background-color: #e94560;
+    -fx-text-fill: white;
+}
+.table-cell {
+    -fx-text-fill: #ddd;
+}
+
+/* ── Line chart ─────────────────────────────────────────────── */
+.chart {
+    -fx-background-color: #16213e;
+    -fx-plot-background-color: #0f3460;
+}
+.chart-title {
+    -fx-text-fill: white;
+}
+.axis-label {
+    -fx-text-fill: #aaa;
+}
+.axis {
+    -fx-tick-label-fill: #aaa;
+}
+.chart-series-line {
+    -fx-stroke-width: 2;
+}
+
+/* ── Scroll pane ─────────────────────────────────────────────── */
+.scroll-pane {
+    -fx-background-color: #1a1a2e;
+}
+.scroll-pane .viewport {
+    -fx-background-color: #1a1a2e;
+}
+
+/* ── Labels ──────────────────────────────────────────────────── */
+.label {
+    -fx-text-fill: #ddd;
+}
