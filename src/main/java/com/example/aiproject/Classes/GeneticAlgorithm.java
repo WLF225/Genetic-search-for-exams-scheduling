@@ -44,10 +44,6 @@ public class GeneticAlgorithm {
 
     // To run without the UI
     public Chromosome run(){
-        return run(null);
-    }
-
-    public Chromosome run(ProgressCallback callback){
         int courseCount = Launcher.data.getCourses().length;
         // To start fresh so the crossover viewer shows only this run's events
         convergenceHistory.clear();
@@ -74,11 +70,6 @@ public class GeneticAlgorithm {
             }
             convergenceHistory.add(bestEverFitness);
 
-            // To give the UI a chance to refresh the progress bar and labels
-            if (callback != null) {
-                boolean cont = callback.onGeneration(gen, maxGenerations, bestEverFitness, bestEver);
-                if (!cont) break;
-            }
 
             // To build the next generation using selection crossover and mutation
             Chromosome[] nextGen = new Chromosome[populationSize];
