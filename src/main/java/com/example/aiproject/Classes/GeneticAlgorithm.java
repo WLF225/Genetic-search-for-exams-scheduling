@@ -2,6 +2,7 @@ package com.example.aiproject.Classes;
 
 import com.example.aiproject.Launcher;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,8 +87,8 @@ public class GeneticAlgorithm {
             nextGen[0] = new Chromosome(bestEver);
 
             for (int i = 1; i < populationSize; i += 2) {
-                Chromosome p1 = tournamentSelect(population, fitnesses);
-                Chromosome p2 = tournamentSelect(population, fitnesses);
+                Chromosome p1 = selection(population, fitnesses);
+                Chromosome p2 = selection(population, fitnesses);
 
                 Chromosome c1 = new Chromosome(p1);
                 Chromosome c2 = new Chromosome(p2);
@@ -112,19 +113,63 @@ public class GeneticAlgorithm {
     // To compute fitness scores for every chromosome in one pass
     private double[] evaluate(Chromosome[] pop){
         double[] f = new double[pop.length];
-        for (int i = 0; i < pop.length; i++) f[i] = pop[i].fitness().getFitness();
+
+        for (int i = 0; i < pop.length; i++)
+            f[i] = pop[i].fitness().getFitness();
+
         return f;
     }
 
-    // To pick the fittest individual from a random sample
-    private Chromosome tournamentSelect(Chromosome[] pop, double[] fitnesses){
-        int best = (int) (Math.random() * pop.length);
-        for (int i = 1; i < pop.length; i++) {
-            int candidate = (int) (Math.random() * pop.length);
-            if (fitnesses[candidate] > fitnesses[best])
-                best = candidate;
+    private Chromosome selection(Chromosome[] pop, double[] fitnesses) {
+        double temperature = 15;
+
+        // To give each fitness to the power to make the 3000 have much more weight than 2900
+        double[] scaled = new double[fitnesses.length];
+        double total = 0;
+        for (int i = 0; i < fitnesses.length; i++) {
+            scaled[i] = Math.pow(fitnesses[i], temperature);
+            total += scaled[i];
         }
-        return pop[best];
+
+        // To get the random value we will compare against
+        double spin = Math.random() * total;
+
+        double cumulative = 0;
+        for (int i = 0; i < pop.length; i++) {
+            cumulative += scaled[i];
+            if (cumulative >= spin)
+                return pop[i];
+        }
+        return pop[pop.length - 1];
+    }
+
+    // To save the convergence history to a CSV file after each run
+    public void saveConvergenceToFile(String filePath) {
+        try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(filePath))) {
+            pw.println("Generation,BestFitness");
+            DecimalFormat df = new DecimalFormat("0.00");
+            for (int i = 0; i < convergenceHistory.size(); i++) {
+                pw.println(i + "," + df.format(convergenceHistory.get(i)));
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("Could not write convergence file: " + e.getMessage());
+        }
+    }
+
+    // To save the best schedule to a CSV file after each run
+    public void saveScheduleToFile(String filePath, Chromosome best, Course[] courses) {
+        String[] times = {"09:00-11:00", "12:00-14:00", "15:00-17:00"};
+        try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(filePath))) {
+            pw.println("Course,Day,Slot,Time");
+            byte[][] genes = best.getGenes();
+            for (int i = 0; i < genes.length; i++) {
+                int day  = genes[i][0];
+                int slot = genes[i][1];
+                pw.println(courses[i].getName() + ",Day " + day + "," + slot + "," + times[slot - 1]);
+            }
+        } catch (java.io.IOException e) {
+            System.err.println("Could not write schedule file: " + e.getMessage());
+        }
     }
 
     public List<Double> getConvergenceHistory(){

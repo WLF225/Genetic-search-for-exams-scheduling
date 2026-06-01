@@ -132,7 +132,8 @@ public class MainController implements Initializable {
                 progressBar.setProgress(1);
                 lblStatus.setText("Done — best fitness: " + String.format("%.2f", ga.getBestEverFitness()));
                 populateScheduleTable(best);
-                // To populate the crossover viewer immediately after a run completes
+                ga.saveConvergenceToFile("convergence_run.csv");
+                ga.saveScheduleToFile("schedule_result.csv", best, Launcher.data.getCourses());
                 crossoverIndex = 0;
                 currentGeneration = 0;
                 renderCrossoverStep();
