@@ -26,8 +26,8 @@ public class Crossover {
         byte[][] p1Before = deepCopy(gene1);
         byte[][] p2Before = deepCopy(gene2);
 
-        double p1Fitness = c1.fitness().getFitness();
-        double p2Fitness = c2.fitness().getFitness();
+        double p1Fitness = c1.getFitnessSnapshot().getFitness();
+        double p2Fitness = c2.getFitnessSnapshot().getFitness();
 
         byte[][] newGenes1 = new byte[gene1.length][2];
         byte[][] newGenes2 = new byte[gene2.length][2];
@@ -52,7 +52,7 @@ public class Crossover {
                 p1Before, p2Before,
                 deepCopy(newGenes1), deepCopy(newGenes2),
                 p1Fitness, p2Fitness,
-                c1.fitness().getFitness(), c2.fitness().getFitness(),
+                c1.getFitnessSnapshot().getFitness(), c2.getFitnessSnapshot().getFitness(),
                 crossOverPoint1, crossOverPoint2
         ));
 

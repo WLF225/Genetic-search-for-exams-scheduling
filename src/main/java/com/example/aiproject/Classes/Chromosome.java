@@ -8,20 +8,24 @@ public class Chromosome {
     private double power;
     private int mustBePenalty;
     private int preferablePenalty;
+    private int betterPenalty;
+    private FitnessSnapshot fitnessSnapshot;
 
     private byte[][] genes;
 
     // To create a chromosome for the initial random population
-    public Chromosome(int capacity, double power, int mustBePenalty, int preferablePenalty) {
+    public Chromosome(int capacity, double power, int mustBePenalty, int preferablePenalty, int betterPenalty) {
         this.power = power;
         this.mustBePenalty = mustBePenalty;
         this.preferablePenalty = preferablePenalty;
+        this.betterPenalty = betterPenalty;
         genes = new byte[capacity][2];
         // To assign each course a random day (1-6) and a random time slot (1-3)
         for (int i = 0; i < capacity; i++) {
             genes[i][0] = (byte) ((Math.random() * 6) + 1);
             genes[i][1] = (byte) ((Math.random() * 3) + 1);
         }
+        fitnessSnapshot = fitness();
     }
 
     // To clone a chromosome without sharing its gene array reference
@@ -29,6 +33,8 @@ public class Chromosome {
         this.power = other.power;
         this.mustBePenalty = other.mustBePenalty;
         this.preferablePenalty = other.preferablePenalty;
+        this.betterPenalty = other.betterPenalty;
+        this.fitnessSnapshot = other.fitnessSnapshot;
         this.genes = new byte[other.genes.length][2];
         for (int i = 0; i < other.genes.length; i++) {
             this.genes[i][0] = other.genes[i][0];
@@ -42,20 +48,23 @@ public class Chromosome {
 
     public void setGenes(byte[][] genes) {
         this.genes = genes;
+        fitnessSnapshot = fitness();
     }
 
     public void mutate(double mutationRate) {
+        fitnessSnapshot = null;
         for (int i = 0; i < genes.length; i++) {
             if (Math.random() < mutationRate) {
                 genes[i][0] = (byte) ((Math.random() * 6) + 1);
                 genes[i][1] = (byte) ((Math.random() * 3) + 1);
             }
         }
+        fitnessSnapshot = fitness();
     }
 
     public FitnessSnapshot fitness() {
 
-        FitnessSnapshot snapshot = new FitnessSnapshot();
+        FitnessSnapshot snapshot = new FitnessSnapshot(mustBePenalty, preferablePenalty, betterPenalty);
 
         // To find out which of the six days are actually used across all courses
         boolean[] weekDays = new boolean[6];
@@ -118,10 +127,14 @@ public class Chromosome {
         snapshot.reduceFitness(mustBePenalty*Math.pow((double) snapshot.getSameTime() /studentPop, power));
         snapshot.reduceFitness(mustBePenalty*Math.pow((double) snapshot.getFourInTwoDays()/studentPop, power));
         snapshot.reduceFitness(mustBePenalty*Math.pow((double) snapshot.getMoreThan2InDay()/studentPop, power));
-        snapshot.reduceFitness(preferablePenalty*Math.pow((double) snapshot.getTwoSameDay()/studentPop, power));
+        snapshot.reduceFitness(betterPenalty * Math.pow((double) snapshot.getTwoSameDay()/studentPop, power));
         snapshot.reduceFitness(preferablePenalty * Math.pow(snapshot.getDaysUsed() / 6.0,power));
 
         return snapshot;
+    }
+
+    public FitnessSnapshot getFitnessSnapshot() {
+        return fitnessSnapshot;
     }
 
     @Override

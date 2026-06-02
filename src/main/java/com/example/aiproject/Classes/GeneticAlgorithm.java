@@ -16,6 +16,8 @@ public class GeneticAlgorithm {
     private final double power;
     private final int mustBePenalty;
     private final int preferablePenalty;
+    private final int betterPenality;
+
 
     // To track the evolving population and the best chromosome seen so far
     private Chromosome[] population;
@@ -25,14 +27,9 @@ public class GeneticAlgorithm {
     // To record the best fitness at each generation so the convergence chart can be drawn
     private final List<Double> convergenceHistory = new ArrayList<>();
 
-    // To let the UI receive live progress updates without blocking the GA thread
-    public interface ProgressCallback {
-        // To signal each completed generation; return false to stop early
-        boolean onGeneration(int generation, int maxGenerations, double bestFitness, Chromosome best);
-    }
 
     public GeneticAlgorithm(int populationSize, int maxGenerations, double mutationRate,
-                            double power, int mustBePenalty, int preferablePenalty){
+                            double power, int mustBePenalty, int preferablePenalty, int betterPenality){
 
         this.populationSize = populationSize;
         this.maxGenerations = maxGenerations;
@@ -40,9 +37,9 @@ public class GeneticAlgorithm {
         this.power = power;
         this.mustBePenalty = mustBePenalty;
         this.preferablePenalty = preferablePenalty;
+        this.betterPenality = betterPenality;
     }
 
-    // To run without the UI
     public Chromosome run(){
         int courseCount = Launcher.data.getCourses().length;
         // To start fresh so the crossover viewer shows only this run's events
@@ -53,7 +50,7 @@ public class GeneticAlgorithm {
         // To seed the initial population with random chromosomes
         population = new Chromosome[populationSize];
         for (int i = 0; i < populationSize; i++) {
-            population[i] = new Chromosome(courseCount, power, mustBePenalty, preferablePenalty);
+            population[i] = new Chromosome(courseCount, power, mustBePenalty, preferablePenalty, betterPenality);
         }
 
         for (int gen = 0; gen < maxGenerations; gen++) {
@@ -106,7 +103,7 @@ public class GeneticAlgorithm {
         double[] f = new double[pop.length];
 
         for (int i = 0; i < pop.length; i++)
-            f[i] = pop[i].fitness().getFitness();
+            f[i] = pop[i].getFitnessSnapshot().getFitness();
 
         return f;
     }
@@ -161,14 +158,6 @@ public class GeneticAlgorithm {
         } catch (java.io.IOException e) {
             System.err.println("Could not write schedule file: " + e.getMessage());
         }
-    }
-
-    public List<Double> getConvergenceHistory(){
-        return convergenceHistory;
-    }
-
-    public double getBestEverFitness(){
-        return bestEverFitness;
     }
 
 }

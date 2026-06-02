@@ -15,8 +15,8 @@ public class FitnessSnapshot {
     // The fitness score for this chromosome
     private double fitness;
 
-    public FitnessSnapshot(){
-        fitness = 3200;
+    public FitnessSnapshot(int mustBePenalty, int preferablePenalty, int betterPenalty){
+        fitness = mustBePenalty*3 + preferablePenalty + betterPenalty;
     }
 
     public int getSameTime() {
